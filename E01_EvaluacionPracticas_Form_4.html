@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evaluación de Prácticas – Project SEARCH</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f2ec;
+    --surface: #ffffff;
+    --border: #d9d4ca;
+    --text: #1a1814;
+    --muted: #7a7367;
+    --accent: #2a5f4e;
+    --accent-light: #e8f2ef;
+    --score-4: #2a5f4e;
+    --score-3: #4a8c6f;
+    --score-2: #e09b3a;
+    --score-1: #c04a3a;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+  }
+
+  .page { max-width: 820px; margin: 0 auto; }
+
+  /* ── Header ── */
+  .header {
+    background: var(--accent);
+    color: #fff;
+    border-radius: var(--radius);
+    padding: 36px 40px 32px;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    right: -40px; top: -40px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+  }
+  .header-tag { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; opacity: 0.7; margin-bottom: 8px; }
+  .header h1 { font-family: 'DM Serif Display', serif; font-size: 28px; font-weight: 400; line-height: 1.2; }
+  .header-subtitle { margin-top: 6px; opacity: 0.8; font-size: 14px; }
+
+  /* ── Meta fields ── */
+  .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
+  .field-group { display: flex; flex-direction: column; gap: 5px; }
+  .field-group label { font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); }
+  .field-group input, .field-group select {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .field-group input:focus, .field-group select:focus { border-color: var(--accent); }
+
+  /* ── Email block (solo pantalla) ── */
+  .email-block {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 28px;
+  }
+  .email-block-title {
+    font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .email-block-title::before { content: '✉'; font-size: 14px; color: var(--accent); }
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .email-grid .field-group input { font-size: 13px; }
+
+  /* ── Legend ── */
+  .legend {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+    align-items: center;
+  }
+  .legend-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── Section card ── */
+  .section-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    overflow: hidden;
+    page-break-inside: avoid;
+  }
+  .section-header {
+    background: var(--accent-light);
+    border-bottom: 1.5px solid var(--border);
+    padding: 14px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .section-title { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--accent); }
+  .section-avg {
+    font-size: 12px; font-weight: 600; color: var(--muted);
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 20px; padding: 4px 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .section-avg span { font-size: 14px; font-weight: 700; color: var(--accent); }
+
+  .edit-hint {
+    font-size: 11px; color: var(--muted); text-align: right;
+    padding: 6px 22px 2px; font-style: italic;
+  }
+
+  /* ── Item row ── */
+  .item-row {
+    padding: 10px 22px;
+    border-bottom: 1px solid #f0ede8;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: background 0.15s;
+    page-break-inside: avoid;
+  }
+  .item-row:hover { background: #faf8f5; }
+
+  .item-label {
+    flex: 1;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.4;
+    border: 1.5px solid transparent;
+    border-radius: 6px;
+    padding: 5px 7px;
+    outline: none;
+    cursor: text;
+    transition: border-color 0.2s, background 0.2s;
+    min-width: 0;
+    word-break: break-word;
+  }
+  .item-label:hover { border-color: var(--border); background: var(--bg); }
+  .item-label:focus { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 3px rgba(42,95,78,0.08); }
+
+  /* Score buttons – pantalla */
+  .score-buttons { display: flex; gap: 6px; flex-shrink: 0; }
+  .score-btn {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    background: var(--bg);
+    font-size: 14px; font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .score-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .score-btn.selected-4 { background: var(--score-4); border-color: var(--score-4); color: #fff; }
+  .score-btn.selected-3 { background: var(--score-3); border-color: var(--score-3); color: #fff; }
+  .score-btn.selected-2 { background: var(--score-2); border-color: var(--score-2); color: #fff; }
+  .score-btn.selected-1 { background: var(--score-1); border-color: var(--score-1); color: #fff; }
+
+  /* Score badge – solo aparece en el PDF (hidden en pantalla) */
+  .score-badge {
+    display: none;
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    font-size: 16px; font-weight: 700;
+    align-items: center; justify-content: center;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .score-badge.badge-4 { background: var(--score-4); }
+  .score-badge.badge-3 { background: var(--score-3); }
+  .score-badge.badge-2 { background: var(--score-2); }
+  .score-badge.badge-1 { background: var(--score-1); }
+  .score-badge.badge-none { background: var(--border); color: var(--muted); }
+
+  /* ── Comments ── */
+  .comments-row { padding: 12px 22px 16px; border-top: 1px dashed var(--border); background: #faf8f5; }
+  .comments-row label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; }
+  .comments-row textarea {
+    width: 100%; border: 1.5px solid var(--border); border-radius: 7px; padding: 9px 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text);
+    background: var(--surface); resize: vertical; min-height: 52px; outline: none; transition: border-color 0.2s;
+  }
+  .comments-row textarea:focus { border-color: var(--accent); }
+
+  /* ── Action Plan ── */
+  .action-plan { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); margin-bottom: 20px; overflow: hidden; }
+  .action-plan .section-header { background: #f0eae0; }
+  .action-plan .section-title { color: #7a4a1a; }
+  .action-plan-note { padding: 12px 22px 8px; font-size: 13px; color: var(--muted); font-style: italic; }
+
+  .action-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; border-top: 1px solid var(--border); }
+  .action-col { padding: 14px 22px; border-right: 1px solid var(--border); }
+  .action-col:last-child { border-right: none; }
+  .action-col label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 8px; }
+
+  .area-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; min-height: 0; }
+  .area-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    border-radius: 20px; padding: 3px 10px;
+    font-size: 12px; font-weight: 500;
+    background: #fde8d8; border: 1.5px solid #e09b3a; color: #7a4a1a;
+  }
+  .area-tag.score-1-tag { background: #fde8e8; border-color: var(--score-1); color: #6b1a1a; }
+  .area-tag .tag-score { font-weight: 700; font-size: 11px; }
+
+  .action-col textarea {
+    width: 100%; border: 1.5px solid var(--border); border-radius: 7px; padding: 9px 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text);
+    background: var(--bg); resize: vertical; min-height: 80px; outline: none; transition: border-color 0.2s;
+  }
+  .action-col textarea:focus { border-color: var(--accent); }
+
+  /* ── Signatures ── */
+  .signatures { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); margin-bottom: 28px; overflow: hidden; }
+  .sig-row { display: grid; grid-template-columns: 1fr 160px; gap: 16px; padding: 14px 22px; border-bottom: 1px solid var(--border); align-items: end; }
+  .sig-row:last-child { border-bottom: none; }
+  .sig-name label, .sig-date label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 5px; }
+  .sig-name input, .sig-date input {
+    width: 100%; border: none; border-bottom: 2px solid var(--border); border-radius: 0;
+    padding: 6px 2px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text);
+    background: transparent; outline: none; transition: border-color 0.2s;
+  }
+  .sig-name input:focus, .sig-date input:focus { border-color: var(--accent); }
+
+  /* ── Total score ── */
+  .total-block {
+    background: var(--accent); color: #fff; border-radius: var(--radius);
+    padding: 24px 30px; margin-bottom: 20px;
+    display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  }
+  .total-left { flex: 1; }
+  .total-label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.7; }
+  .total-score { font-family: 'DM Serif Display', serif; font-size: 52px; line-height: 1; }
+  .total-grade { font-size: 14px; opacity: 0.85; margin-top: 4px; font-weight: 500; }
+  .grade-scale { font-size: 12px; opacity: 0.65; line-height: 1.7; text-align: right; }
+
+  /* ── Action bar ── */
+  .actions-bar {
+    display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    align-items: center;
+  }
+  .actions-label { flex: 1; font-size: 12px; color: var(--muted); font-style: italic; min-width: 160px; }
+  .btn { padding: 12px 22px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
+  .btn-ghost { background: transparent; border: 2px solid var(--border); color: var(--muted); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-outline { background: transparent; border: 2px solid var(--accent); color: var(--accent); }
+  .btn-outline:hover { background: var(--accent-light); }
+  .btn-send { background: #1a3fa0; color: #fff; }
+  .btn-send:hover { background: #152e78; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #1a1814; color: #fff;
+    padding: 12px 22px; border-radius: 30px;
+    font-size: 14px; font-weight: 500;
+    opacity: 0; pointer-events: none;
+    transition: all 0.3s;
+    z-index: 1000;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── PDF mode class (applied via JS before generating) ── */
+  body.pdf-mode {
+    background: #fff;
+    padding: 0;
+  }
+  body.pdf-mode .pdf-hidden { display: none !important; }
+  body.pdf-mode .score-buttons { display: none !important; }
+  body.pdf-mode .score-badge { display: flex !important; }
+  body.pdf-mode .item-label {
+    border: none !important;
+    background: transparent !important;
+    padding: 5px 2px !important;
+    cursor: default !important;
+  }
+
+  @media (max-width: 620px) {
+    .meta-grid { grid-template-columns: 1fr; }
+    .email-grid { grid-template-columns: 1fr; }
+    .action-grid { grid-template-columns: 1fr; }
+    .action-col { border-right: none; border-bottom: 1px solid var(--border); }
+    .action-col:last-child { border-bottom: none; }
+    .sig-row { grid-template-columns: 1fr; }
+    .item-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .total-block { flex-direction: column; text-align: center; }
+    .grade-scale { text-align: center; }
+    .actions-bar { flex-direction: column; align-items: stretch; }
+    .btn { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Contenido que se convierte a PDF -->
+<div class="page" id="form-content">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-tag">Empleo con Apoyo · Aura Fundació</div>
+    <h1>Evaluación de Prácticas<br>Project SEARCH</h1>
+    <div class="header-subtitle">Formulario de valoración de habilidades laborales</div>
+  </div>
+
+  <!-- Meta -->
+  <div class="meta-grid">
+    <div class="field-group">
+      <label>Nombre del Participante</label>
+      <input type="text" id="nombre" placeholder="Nombre completo">
+    </div>
+    <div class="field-group">
+      <label>Fecha</label>
+      <input type="date" id="fecha">
+    </div>
+    <div class="field-group">
+      <label>Formador/a</label>
+      <input type="text" id="formador" placeholder="Nombre del formador/a">
+    </div>
+    <div class="field-group">
+      <label>Itinerario</label>
+      <select id="itinerario">
+        <option value="">Seleccionar...</option>
+        <option value="Itinerario 2">Itinerario 2</option>
+        <option value="Itinerario 3">Itinerario 3</option>
+        <option value="Itinerario 4">Itinerario 4</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Email block – oculto en PDF -->
+  <div class="email-block pdf-hidden">
+    <div class="email-block-title">Envío por correo electrónico</div>
+    <div class="email-grid">
+      <div class="field-group">
+        <label>De (tu correo)</label>
+        <input type="email" id="email-from" placeholder="formador@aurafundacio.org">
+      </div>
+      <div class="field-group">
+        <label>Para (destinatario)</label>
+        <input type="email" id="email-to" placeholder="coordinadora@aurafundacio.org">
+      </div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <span class="legend-label">Escala:</span>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--score-4)"></div>4 – Excelente</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--score-3)"></div>3 – Bien</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--score-2)"></div>2 – Mejorando</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--score-1)"></div>1 – Necesita mejorar</div>
+  </div>
+
+  <!-- Sections -->
+  <div id="sections-container"></div>
+
+  <!-- Total score -->
+  <div class="total-block">
+    <div class="total-left">
+      <div class="total-label">Puntuación total</div>
+      <div class="total-score" id="total-score">–</div>
+      <div class="total-grade" id="total-grade">Completa la evaluación</div>
+    </div>
+    <div class="grade-scale">
+      100–90 → A &nbsp;|&nbsp; 89–80 → B<br>
+      79–70 → C &nbsp;|&nbsp; 69–60 → D<br>
+      &lt; 60 → F
+    </div>
+  </div>
+
+  <!-- Action Plan -->
+  <div class="action-plan">
+    <div class="section-header">
+      <div class="section-title">Plan de Acción</div>
+    </div>
+    <p class="action-plan-note pdf-hidden">Los ítems puntuados con 1 o 2 se añaden automáticamente al área de interés.</p>
+    <div class="action-grid">
+      <div class="action-col">
+        <label>Área de interés</label>
+        <div class="area-tags" id="area-tags"></div>
+        <textarea id="area-notes" placeholder="Notas adicionales..."></textarea>
+      </div>
+      <div class="action-col">
+        <label>Plan de acción</label>
+        <textarea placeholder="¿Cómo se va a trabajar?"></textarea>
+      </div>
+      <div class="action-col">
+        <label>Resultados esperados</label>
+        <textarea placeholder="¿Qué se espera conseguir?"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Signatures -->
+  <div class="signatures">
+    <div class="section-header" style="background:#f5f2ec;">
+      <div class="section-title" style="color:var(--text);font-size:15px;">Firmas y Fecha</div>
+    </div>
+    <div id="sigs-container"></div>
+  </div>
+
+</div><!-- /form-content -->
+
+<!-- Botones debajo del formulario -->
+<div class="page">
+  <div class="actions-bar pdf-hidden" style="margin-top:16px;">
+    <span class="actions-label">El PDF se descarga al pulsar "Generar PDF y abrir correo".</span>
+    <button class="btn btn-ghost" onclick="resetForm()">🗑 Limpiar</button>
+    <button class="btn btn-outline" onclick="downloadPDF()">⬇ Descargar PDF</button>
+    <button class="btn btn-send" onclick="sendEmail()" id="btn-send">✉ Generar PDF y abrir correo</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+const SECTIONS = [
+  {
+    id: 'social', title: 'Comportamiento Social',
+    items: ['Gestión del estrés','Contacto visual','Evita las interacciones sociales innecesarias','Admite errores','Acepta el reconocimiento','Colaboradora y respetuosa']
+  },
+  {
+    id: 'comunicacion', title: 'Comunicación',
+    items: ['Escucha y presta atención','Expresa necesidades personales (ir al baño, visitas médicas)','Respeta los derechos y la privacidad de los demás','Pide ayuda cuando la necesita','Se comunica de forma adecuada (inicia conversación, no interrumpe)']
+  },
+  {
+    id: 'apariencia', title: 'Apariencia',
+    items: ['Mantiene una buena apariencia','Viste adecuadamente para el trabajo','Higiene corporal']
+  },
+  {
+    id: 'trabajo', title: 'Desarrollo del Trabajo',
+    items: ['Sigue indicaciones','Acepta críticas constructivas / Feedback','Sigue las reglas y la normativa','Mantiene una buena asistencia','Llega y sale a su hora','Cumple con sus tareas de forma constante','Acaba las tareas con cuidado','Trabaja a un ritmo adecuado','Inicia nuevas tareas','Trabaja bien con los compañeros','Sigue adecuadamente la cadena de mando']
+  }
+];
+
+const SIGS = ['Participante', 'Preparador/a Laboral'];
+const scores = {};
+const itemLabels = {};
+
+SECTIONS.forEach(s => {
+  scores[s.id] = new Array(s.items.length).fill(null);
+  itemLabels[s.id] = [...s.items];
+});
+
+/* ── Build sections ── */
+function buildSections() {
+  const container = document.getElementById('sections-container');
+  SECTIONS.forEach(sec => {
+    const card = document.createElement('div');
+    card.className = 'section-card';
+    card.id = 'card-' + sec.id;
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'section-header';
+    header.innerHTML = `<div class="section-title">${sec.title}</div><div class="section-avg">Promedio: <span id="avg-${sec.id}">–</span></div>`;
+    card.appendChild(header);
+
+    // Edit hint (hidden in PDF)
+    const hint = document.createElement('div');
+    hint.className = 'edit-hint pdf-hidden';
+    hint.textContent = '✏️ Haz clic en el texto de un ítem para editarlo';
+    card.appendChild(hint);
+
+    // Items
+    sec.items.forEach((item, idx) => {
+      const row = document.createElement('div');
+      row.className = 'item-row';
+
+      // Editable label
+      const labelDiv = document.createElement('div');
+      labelDiv.className = 'item-label';
+      labelDiv.contentEditable = 'true';
+      labelDiv.textContent = item;
+      labelDiv.title = 'Haz clic para editar';
+      labelDiv.addEventListener('input', () => {
+        itemLabels[sec.id][idx] = labelDiv.textContent.trim() || sec.items[idx];
+        updateAreaTags();
+      });
+      labelDiv.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); labelDiv.blur(); } });
+
+      // Score buttons (shown on screen)
+      const btns = document.createElement('div');
+      btns.className = 'score-buttons';
+      [4,3,2,1].forEach(v => {
+        const btn = document.createElement('button');
+        btn.className = 'score-btn';
+        btn.dataset.sec = sec.id; btn.dataset.idx = idx; btn.dataset.val = v;
+        btn.textContent = v;
+        btn.addEventListener('click', () => setScore(sec.id, idx, v));
+        btns.appendChild(btn);
+      });
+
+      // Score badge (shown only in PDF)
+      const badge = document.createElement('div');
+      badge.className = 'score-badge badge-none';
+      badge.dataset.badgeSec = sec.id;
+      badge.dataset.badgeIdx = idx;
+      badge.textContent = '–';
+
+      row.appendChild(labelDiv);
+      row.appendChild(btns);
+      row.appendChild(badge);
+      card.appendChild(row);
+    });
+
+    // Comments
+    const cmts = document.createElement('div');
+    cmts.className = 'comments-row';
+    cmts.innerHTML = `<label>Comentarios</label><textarea placeholder="Observaciones adicionales..."></textarea>`;
+    card.appendChild(cmts);
+
+    container.appendChild(card);
+  });
+}
+
+/* ── Build signatures ── */
+function buildSigs() {
+  const c = document.getElementById('sigs-container');
+  SIGS.forEach(sig => {
+    const row = document.createElement('div');
+    row.className = 'sig-row';
+    row.innerHTML = `
+      <div class="sig-name"><label>${sig}</label><input type="text" placeholder="Nombre y firma"></div>
+      <div class="sig-date"><label>Fecha</label><input type="date"></div>`;
+    c.appendChild(row);
+  });
+}
+
+/* ── Scoring ── */
+function setScore(secId, idx, val) {
+  scores[secId][idx] = val;
+
+  // Update buttons
+  document.querySelectorAll(`[data-sec="${secId}"][data-idx="${idx}"]`).forEach(btn => {
+    btn.className = 'score-btn';
+    if (parseInt(btn.dataset.val) === val) btn.classList.add(`selected-${val}`);
+  });
+
+  // Update badge
+  const badge = document.querySelector(`[data-badge-sec="${secId}"][data-badge-idx="${idx}"]`);
+  if (badge) {
+    badge.className = `score-badge badge-${val}`;
+    badge.textContent = val;
+  }
+
+  updateAvg(secId);
+  updateTotal();
+  updateAreaTags();
+}
+
+function updateAreaTags() {
+  const tagsContainer = document.getElementById('area-tags');
+  tagsContainer.innerHTML = '';
+  SECTIONS.forEach(sec => {
+    scores[sec.id].forEach((score, idx) => {
+      if (score === 1 || score === 2) {
+        const tag = document.createElement('div');
+        tag.className = `area-tag${score === 1 ? ' score-1-tag' : ''}`;
+        tag.innerHTML = `<span class="tag-score">${score}</span>${itemLabels[sec.id][idx] || sec.items[idx]}`;
+        tag.title = sec.title;
+        tagsContainer.appendChild(tag);
+      }
+    });
+  });
+}
+
+function updateAvg(secId) {
+  const vals = scores[secId].filter(v => v !== null);
+  document.getElementById('avg-' + secId).textContent = vals.length
+    ? (vals.reduce((a,b) => a+b, 0) / vals.length).toFixed(2) : '–';
+}
+
+function updateTotal() {
+  const all = Object.values(scores).flat().filter(v => v !== null);
+  const totalEl = document.getElementById('total-score');
+  const gradeEl = document.getElementById('total-grade');
+  if (!all.length) { totalEl.textContent = '–'; gradeEl.textContent = 'Completa la evaluación'; return; }
+  const pct = (all.reduce((a,b) => a+b, 0) / (all.length * 4)) * 100;
+  totalEl.textContent = pct.toFixed(1) + '%';
+  if      (pct >= 90) gradeEl.textContent = 'Calificación: A – Excelente';
+  else if (pct >= 80) gradeEl.textContent = 'Calificación: B – Bien';
+  else if (pct >= 70) gradeEl.textContent = 'Calificación: C – Mejorando';
+  else if (pct >= 60) gradeEl.textContent = 'Calificación: D – Necesita mejorar';
+  else                gradeEl.textContent = 'Calificación: F – Insuficiente';
+}
+
+/* ── Reset ── */
+function resetForm() {
+  if (!confirm('¿Quieres limpiar todo el formulario?')) return;
+  SECTIONS.forEach(s => { scores[s.id].fill(null); itemLabels[s.id] = [...s.items]; });
+  document.querySelectorAll('.score-btn').forEach(b => b.className = 'score-btn');
+  document.querySelectorAll('.score-badge').forEach(b => { b.className = 'score-badge badge-none'; b.textContent = '–'; });
+  document.querySelectorAll('input[type="text"], input[type="date"], input[type="email"], textarea, select').forEach(el => el.value = '');
+  document.querySelectorAll('.item-label').forEach(el => {
+    const badge = el.closest('.item-row').querySelector('.score-badge');
+    if (badge) {
+      const sec = badge.dataset.badgeSec;
+      const idx = parseInt(badge.dataset.badgeIdx);
+      el.textContent = SECTIONS.find(s => s.id === sec).items[idx];
+    }
+  });
+  SECTIONS.forEach(s => { document.getElementById('avg-' + s.id).textContent = '–'; });
+  document.getElementById('total-score').textContent = '–';
+  document.getElementById('total-grade').textContent = 'Completa la evaluación';
+  document.getElementById('area-tags').innerHTML = '';
+  document.getElementById('fecha').valueAsDate = new Date();
+}
+
+/* ── Toast ── */
+function showToast(msg, duration = 3500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+/* ── PDF helpers ── */
+function getPDFFilename() {
+  const nombre = document.getElementById('nombre').value.trim();
+  const date   = document.getElementById('fecha').value || new Date().toISOString().split('T')[0];
+  return `Evaluacion_${(nombre || 'participante').replace(/\s+/g,'_')}_${date}.pdf`;
+}
+
+function getPDFOptions() {
+  return {
+    margin: [10, 10, 10, 10],
+    filename: getPDFFilename(),
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: 'avoid-all' }
+  };
+}
+
+/* Enter PDF mode: hide UI-only elements, swap buttons→badges */
+function enterPDFMode() {
+  document.body.classList.add('pdf-mode');
+  // Make select values visible as plain text for html2canvas
+  document.querySelectorAll('select').forEach(sel => {
+    const val = sel.options[sel.selectedIndex]?.text || '';
+    const span = document.createElement('span');
+    span.className = 'select-text-pdf';
+    span.textContent = val || '–';
+    span.style.cssText = 'font-family:inherit;font-size:14px;color:#1a1814;padding:10px 14px;display:block;';
+    sel.parentNode.insertBefore(span, sel.nextSibling);
+    sel.style.display = 'none';
+  });
+}
+
+/* Exit PDF mode: restore */
+function exitPDFMode() {
+  document.body.classList.remove('pdf-mode');
+  document.querySelectorAll('select').forEach(sel => {
+    const span = sel.parentNode.querySelector('.select-text-pdf');
+    if (span) span.remove();
+    sel.style.display = '';
+  });
+}
+
+/* ── Download PDF ── */
+async function downloadPDF() {
+  const btn = event.target.closest('button');
+  btn.disabled = true; btn.textContent = '⏳ Generando...';
+  try {
+    enterPDFMode();
+    await new Promise(r => setTimeout(r, 80)); // let DOM settle
+    const el = document.getElementById('form-content');
+    await html2pdf().set(getPDFOptions()).from(el).save();
+    showToast('✅ PDF descargado');
+  } catch(e) { showToast('❌ Error al generar el PDF'); }
+  finally { exitPDFMode(); btn.disabled = false; btn.innerHTML = '⬇ Descargar PDF'; }
+}
+
+/* ── Send email: PDF + mailto ── */
+async function sendEmail() {
+  const emailTo   = document.getElementById('email-to').value.trim();
+  const emailFrom = document.getElementById('email-from').value.trim();
+  const nombre    = document.getElementById('nombre').value.trim();
+  const itinerario = document.getElementById('itinerario').value;
+  const fecha     = document.getElementById('fecha').value;
+
+  if (!emailTo) { showToast('⚠️ Introduce el correo destinatario'); return; }
+
+  const btn = document.getElementById('btn-send');
+  btn.disabled = true; btn.textContent = '⏳ Generando PDF...';
+
+  try {
+    enterPDFMode();
+    await new Promise(r => setTimeout(r, 80));
+    const el = document.getElementById('form-content');
+    await html2pdf().set(getPDFOptions()).from(el).save();
+    exitPDFMode();
+
+    // Build mailto
+    const subject = encodeURIComponent(
+      `Evaluación de prácticas – ${nombre || 'Participante'}${itinerario ? ' · ' + itinerario : ''}${fecha ? ' · ' + fecha : ''}`
+    );
+    const body = encodeURIComponent(
+      `Hola,\n\nAdjunto la evaluación de prácticas${nombre ? ' de ' + nombre : ''}${itinerario ? ' (' + itinerario + ')' : ''}${fecha ? ' con fecha ' + fecha : ''}.\n\n⚠️ El PDF se ha descargado automáticamente. Por favor, adjúntalo a este mensaje antes de enviarlo.\n\n${emailFrom ? 'Remitente: ' + emailFrom + '\n' : ''}Saludos,\nAura Fundació – Project SEARCH`
+    );
+    window.location.href = `mailto:${emailTo}?subject=${subject}&body=${body}`;
+    showToast('✅ PDF descargado · Adjúntalo al correo que se abrirá', 5000);
+  } catch(e) {
+    exitPDFMode();
+    showToast('❌ Error al generar el PDF');
+  } finally {
+    btn.disabled = false; btn.innerHTML = '✉ Generar PDF y abrir correo';
+  }
+}
+
+/* ── Init ── */
+buildSections();
+buildSigs();
+document.getElementById('fecha').valueAsDate = new Date();
+</script>
+</body>
+</html>
